@@ -23,15 +23,11 @@ export async function getCompliance(req: Request, res: Response) {
     }),
   ])
 
-  const mScore = maintenanceScore(tasks)
-  const dScore = drillScore(drills.length, attendance)
-  const overdue = overdueTasks(tasks)
-
   return res.json({
     shipId: ship.shipId,
-    maintenanceScore: mScore,
-    drillScore: dScore,
-    overdue,
+    maintenanceScore: maintenanceScore(tasks),
+    drillScore: drillScore(attendance),
+    overdue: overdueTasks(tasks),
     counts: {
       tasksTotal: tasks.length,
       tasksCompleted: tasks.filter((t) => t.status === 'COMPLETED').length,

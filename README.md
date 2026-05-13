@@ -86,3 +86,27 @@ docker compose run --rm server npm run db:seed
 
 - `client/` — React app (`src/pages`, `src/components`, `src/api`)
 - `server/` — Express API (`src/routes`, `src/middleware`, `prisma/`)
+
+## Deploying to Render
+
+The repo ships a `render.yaml` blueprint that provisions a managed Postgres plus the server and client web services.
+
+1. Push the repo to GitHub.
+2. In Render, open **New → Blueprint** and point it at the repo (`render.yaml` is auto-detected).
+3. Approve resource creation. Render will:
+   - Provision `maritime-db` (Postgres 15, free plan).
+   - Build & deploy `maritime-server` from `server/Dockerfile`; `DATABASE_URL` is wired from the managed DB, `JWT_SECRET` is auto-generated, the container runs `prisma migrate deploy` on every start.
+   - Build & deploy `maritime-client` from `client/Dockerfile` serving the built Vite bundle.
+4. After the first apply, verify `VITE_API_URL` on `maritime-client` points to the public URL of `maritime-server` (the `fromService` reference resolves at build time; if the client bundle has an empty API URL, set it manually and redeploy).
+5. Set `CORS_ORIGIN` on `maritime-server` to the public client URL if requests are blocked.
+6. Seed the database once after the first deploy:
+   ```bash
+   render psql maritime-db  # or use the Render shell on the server service
+   # then from the server service shell:
+   npm run db:seed
+   ```
+7. Health check: `GET /health` on the server service.
+
+Default seed credentials (change immediately in production):
+- `admin@example.com` / `password123`
+- `crew@example.com` / `password123`

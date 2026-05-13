@@ -7,10 +7,10 @@ export function maintenanceScore(tasks: Pick<MaintenanceTask, 'status'>[]): numb
   return (completed / total) * 100
 }
 
-export function drillScore(drillCount: number, attendance: Pick<DrillAttendance, 'attended'>[]): number | null {
-  if (drillCount === 0) return null
-  const attended = attendance.filter((a) => a.attended).length
-  return (attended / drillCount) * 100
+/** Percentage of submitted attendance records that were "attended = true". */
+export function drillScore(attendance: Pick<DrillAttendance, 'attended'>[]): number | null {
+  if (attendance.length === 0) return null
+  return (attendance.filter((a) => a.attended).length / attendance.length) * 100
 }
 
 export function overdueTasks<T extends Pick<MaintenanceTask, 'id' | 'dueDate' | 'status' | 'title'>>(tasks: T[]) {

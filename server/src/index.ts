@@ -1,6 +1,8 @@
 import 'dotenv/config'
-import express from 'express'
+import 'express-async-errors'
+import express, { type NextFunction, type Request, type Response } from 'express'
 import cors from 'cors'
+import { Prisma } from '@prisma/client'
 import authRoutes from './routes/authRoutes.js'
 import taskRoutes from './routes/taskRoutes.js'
 import drillRoutes from './routes/drillRoutes.js'
@@ -30,6 +32,20 @@ app.use('/api/ships', shipRoutes)
 app.use('/api/users', userRoutes)
 
 app.use((_req, res) => res.status(404).json({ error: 'Not found' }))
+
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    if (err.code === 'P2025') return res.status(404).json({ error: 'Record not found' })
+    if (err.code === 'P2002') return res.status(409).json({ error: 'Unique constraint violated' })
+    if (err.code === 'P2003') return res.status(400).json({ error: 'Related record not found' })
+  }
+  console.error('[error]', err)
+  return res.status(500).json({ error: 'Internal server error' })
+})
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[unhandledRejection]', reason)
+})
 
 app.listen(port, () => {
   console.log(`API listening on http://localhost:${port}`)

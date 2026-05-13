@@ -7,5 +7,6 @@ const router = Router()
 router.use(authJWT)
 router.get('/', drills.listDrills)
 router.post('/', roleCheck('ADMIN'), drills.createDrill)
+router.delete('/:id', roleCheck('ADMIN'), drills.deleteDrill)
 router.post('/:id/attend', drills.attendDrill)
 export default router

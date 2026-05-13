@@ -8,5 +8,6 @@ router.use(authJWT)
 router.get('/', tasks.listTasks)
 router.post('/', roleCheck('ADMIN'), tasks.createTask)
 router.patch('/:id', tasks.updateTask)
+router.delete('/:id', roleCheck('ADMIN'), tasks.deleteTask)
 router.post('/:id/comments', tasks.addComment)
 export default router

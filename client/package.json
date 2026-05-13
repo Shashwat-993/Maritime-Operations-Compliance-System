@@ -1,5 +1,6 @@
 {
-  "name": "client",
+  "name": "maritime-operations-compliance-client",
+  "description": "Maritime Operations & Compliance System client app",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -11,8 +12,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.76.1",
     "axios": "^1.9.0",
-    "name": "maritime-operations-compliance-client",
-    "description": "Maritime Operations & Compliance System client app",
+    "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.0",
     "recharts": "^2.15.3"

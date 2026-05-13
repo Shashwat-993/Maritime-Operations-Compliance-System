@@ -7,6 +7,23 @@ import { useAuth } from '../context/AuthContext'
 
 const TYPES: DrillType[] = ['FIRE', 'EVACUATION', 'MOB']
 
+function ErrorBanner({ message }: { message: string }) {
+  return (
+    <div
+      style={{
+        background: '#fef2f2',
+        border: '1px solid #fca5a5',
+        borderRadius: 8,
+        padding: '0.6rem 0.9rem',
+        color: '#b91c1c',
+        fontSize: 14,
+      }}
+    >
+      {message}
+    </div>
+  )
+}
+
 export function DrillsPage() {
   const { user } = useAuth()
   const { effectiveShipId, shipQuery, isAdmin } = useShipScope()
@@ -14,6 +31,8 @@ export function DrillsPage() {
   const [dateFilter, setDateFilter] = useState('')
   const [type, setType] = useState<DrillType>('FIRE')
   const [scheduled, setScheduled] = useState('')
+  const [formError, setFormError] = useState('')
+  const [mutationError, setMutationError] = useState('')
 
   const { data: drills, isLoading } = useQuery({
     queryKey: ['drills', effectiveShipId, dateFilter],
@@ -42,6 +61,13 @@ export function DrillsPage() {
       qc.invalidateQueries({ queryKey: ['drills'] })
       qc.invalidateQueries({ queryKey: ['compliance'] })
       setScheduled('')
+      setFormError('')
+    },
+    onError: (err: unknown) => {
+      const msg =
+        (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
+        'Failed to create drill'
+      setFormError(msg)
     },
   })
 
@@ -52,6 +78,30 @@ export function DrillsPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['drills'] })
       qc.invalidateQueries({ queryKey: ['compliance'] })
+      setMutationError('')
+    },
+    onError: (err: unknown) => {
+      const msg =
+        (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
+        'Failed to record attendance'
+      setMutationError(msg)
+    },
+  })
+
+  const deleteDrill = useMutation({
+    mutationFn: async (id: string) => {
+      await api.delete(`/api/drills/${id}`)
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['drills'] })
+      qc.invalidateQueries({ queryKey: ['compliance'] })
+      setMutationError('')
+    },
+    onError: (err: unknown) => {
+      const msg =
+        (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
+        'Failed to delete drill'
+      setMutationError(msg)
     },
   })
 
@@ -104,6 +154,7 @@ export function DrillsPage() {
             onChange={(e) => setScheduled(e.target.value)}
             required
           />
+          {formError && <ErrorBanner message={formError} />}
           <button
             type="submit"
             disabled={createDrill.isPending}
@@ -115,15 +166,20 @@ export function DrillsPage() {
               borderRadius: 8,
             }}
           >
-            Create drill
+            {createDrill.isPending ? 'Scheduling…' : 'Create drill'}
           </button>
         </form>
       )}
+
+      {mutationError && <ErrorBanner message={mutationError} />}
 
       {isLoading ? (
         <p>Loading drills…</p>
       ) : (
         <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 12 }}>
+          {(drills ?? []).length === 0 && (
+            <li style={{ color: '#64748b', fontSize: 14 }}>No drills found.</li>
+          )}
           {(drills ?? []).map((d) => {
             const mine = user ? d.attendance.find((a) => a.userId === user.id) : undefined
             return (
@@ -136,11 +192,37 @@ export function DrillsPage() {
                   padding: '1rem',
                 }}
               >
-                <div style={{ fontWeight: 600 }}>
-                  {d.type} — {new Date(d.scheduledDate).toLocaleString()}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div style={{ fontWeight: 600 }}>
+                    {d.type} — {new Date(d.scheduledDate).toLocaleString()}
+                  </div>
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (confirm(`Delete this ${d.type} drill?`)) deleteDrill.mutate(d.id)
+                      }}
+                      style={{
+                        padding: '0.25rem 0.5rem',
+                        background: '#fef2f2',
+                        color: '#b91c1c',
+                        border: '1px solid #fca5a5',
+                        borderRadius: 6,
+                        cursor: 'pointer',
+                        fontSize: 12,
+                      }}
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
                 <div style={{ fontSize: 13, color: '#64748b', marginTop: 6 }}>
                   Attendance recorded: {d.attendance.length}
+                  {d.attendance.length > 0 && (
+                    <span style={{ marginLeft: 8 }}>
+                      ({d.attendance.filter((a) => a.attended).length} attended)
+                    </span>
+                  )}
                 </div>
                 {user && (
                   <div style={{ marginTop: 10, display: 'flex', gap: 8, alignItems: 'center' }}>

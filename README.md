@@ -86,7 +86,7 @@ docker compose run --rm server npm run db:seed
 
 - `client/` — React app (`src/pages`, `src/components`, `src/api`)
 - `server/` — Express API (`src/routes`, `src/middleware`, `prisma/`)
- 
+
 ## Submission checklist
 Include the following artifacts in your submission repository:
 

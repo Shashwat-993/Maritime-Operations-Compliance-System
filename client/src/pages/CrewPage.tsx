@@ -16,36 +16,45 @@ export function CrewPage() {
   })
 
   if (!effectiveShipId) {
-    return <p>Select a ship (admin) or ensure your user is assigned to a vessel.</p>
+    return <div className="card alert-empty">Select a ship (admin) or ensure your user is assigned to a vessel.</div>
   }
 
-  if (isLoading) return <p>Loading crew…</p>
-  if (error) return <p>Could not load crew.</p>
+  if (isLoading) return <div className="card skeleton" style={{ height: 180 }} />
+  if (error) return <div className="alert alert-error">Could not load crew.</div>
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-      <h1 style={{ margin: 0 }}>Crew on this ship</h1>
-      <div style={{ overflowX: 'auto', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12 }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-          <thead>
-            <tr style={{ textAlign: 'left', background: '#f8fafc' }}>
-              <th style={{ padding: '0.65rem', fontWeight: 600 }}>Name</th>
-              <th style={{ padding: '0.65rem', fontWeight: 600 }}>Email</th>
-              <th style={{ padding: '0.65rem', fontWeight: 600 }}>Role</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(data ?? []).map((u) => (
-              <tr key={u.id} style={{ borderTop: '1px solid #e2e8f0' }}>
-                <td style={{ padding: '0.65rem' }}>{u.name}</td>
-                <td style={{ padding: '0.65rem' }}>{u.email}</td>
-                <td style={{ padding: '0.65rem' }}>{u.role}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="stack">
+      <div>
+        <h1>Crew on this ship</h1>
+        <p className="muted text-sm" style={{ marginTop: 4 }}>
+          {(data ?? []).length} member{(data ?? []).length === 1 ? '' : 's'} assigned.
+        </p>
       </div>
-      {(data ?? []).length === 0 && <p>No crew assigned to this ship.</p>}
+      <div className="card card-flush">
+        <div className="table-scroll">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(data ?? []).map((u) => (
+                <tr key={u.id}>
+                  <td style={{ fontWeight: 500 }}>{u.name}</td>
+                  <td className="muted">{u.email}</td>
+                  <td>
+                    <span className={`badge badge-role-${u.role.toLowerCase()}`}>{u.role}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {(data ?? []).length === 0 && <div className="alert-empty">No crew assigned to this ship.</div>}
+      </div>
     </div>
   )
 }

@@ -1,5 +1,4 @@
-import type { CSSProperties } from 'react'
-import { FormEvent, useState } from 'react'
+import { Fragment, FormEvent, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../api/client'
 import type { MaintenanceTask, TaskComment, TaskStatus } from '../api/types'
@@ -9,20 +8,17 @@ import { useAuth } from '../context/AuthContext'
 const STATUSES: TaskStatus[] = ['PENDING', 'IN_PROGRESS', 'COMPLETED']
 
 function ErrorBanner({ message }: { message: string }) {
-  return (
-    <div
-      style={{
-        background: '#fef2f2',
-        border: '1px solid #fca5a5',
-        borderRadius: 8,
-        padding: '0.6rem 0.9rem',
-        color: '#b91c1c',
-        fontSize: 14,
-      }}
-    >
-      {message}
-    </div>
-  )
+  return <div className="alert alert-error">{message}</div>
+}
+
+function statusBadgeClass(s: TaskStatus): string {
+  if (s === 'COMPLETED') return 'badge badge-completed'
+  if (s === 'IN_PROGRESS') return 'badge badge-in-progress'
+  return 'badge badge-pending'
+}
+
+function isOverdue(t: MaintenanceTask): boolean {
+  return Boolean(t.dueDate) && new Date(t.dueDate!).getTime() < Date.now() && t.status !== 'COMPLETED'
 }
 
 function CommentsPanel({ task }: { task: MaintenanceTask }) {
@@ -55,52 +51,35 @@ function CommentsPanel({ task }: { task: MaintenanceTask }) {
   }
 
   return (
-    <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #e2e8f0' }}>
-      <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#475569' }}>
+    <div className="divider">
+      <div className="card-label" style={{ marginBottom: 8 }}>
         Comments
       </div>
       {(task.comments ?? []).length === 0 && (
-        <p style={{ margin: '0 0 6px', fontSize: 13, color: '#94a3b8' }}>No comments yet.</p>
+        <p className="muted text-sm" style={{ marginBottom: 6 }}>
+          No comments yet.
+        </p>
       )}
       {(task.comments ?? []).map((c: TaskComment) => (
-        <div
-          key={c.id}
-          style={{
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: 6,
-            padding: '0.4rem 0.65rem',
-            marginBottom: 6,
-            fontSize: 13,
-          }}
-        >
-          <span style={{ fontWeight: 600 }}>{c.user.name}: </span>
-          {c.note}
-          <span style={{ color: '#94a3b8', marginLeft: 8, fontSize: 11 }}>
-            {new Date(c.createdAt).toLocaleString()}
-          </span>
+        <div key={c.id} className="comment">
+          <span className="comment-author">{c.user.name}:</span> {c.note}
+          <span className="comment-time">{new Date(c.createdAt).toLocaleString()}</span>
         </div>
       ))}
       {user && (
-        <form onSubmit={onSubmit} style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+        <form onSubmit={onSubmit} className="row" style={{ marginTop: 8 }}>
           <input
+            className="input input-sm"
             placeholder="Add a comment…"
             value={note}
             onChange={(e) => setNote(e.target.value)}
             maxLength={2000}
-            style={{ flex: 1, padding: '0.35rem', fontSize: 13 }}
+            style={{ flex: 1 }}
           />
           <button
             type="submit"
             disabled={addComment.isPending || !note.trim()}
-            style={{
-              padding: '0.35rem 0.65rem',
-              background: '#0369a1',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 6,
-              fontSize: 13,
-            }}
+            className="btn btn-primary btn-sm"
           >
             Send
           </button>
@@ -207,86 +186,93 @@ export function MaintenancePage() {
   }
 
   if (!effectiveShipId) {
-    return <p>Select a ship (admin) or ensure your user is assigned to a vessel.</p>
+    return <div className="card alert-empty">Select a ship (admin) or ensure your user is assigned to a vessel.</div>
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-      <h1 style={{ margin: 0 }}>Maintenance</h1>
-      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
-        <label style={{ fontSize: 14 }}>
+    <div className="stack">
+      <div>
+        <h1>Maintenance</h1>
+        <p className="muted text-sm" style={{ marginTop: 4 }}>
+          Manage tasks and crew comments for this ship.
+        </p>
+      </div>
+
+      <div className="card row" style={{ alignItems: 'flex-end' }}>
+        <label className="field" style={{ minWidth: 160 }}>
           Status
           <select
+            className="select"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            style={{ marginLeft: 8, padding: '0.35rem' }}
           >
-            <option value="">All</option>
+            <option value="">All statuses</option>
             {STATUSES.map((s) => (
               <option key={s} value={s}>
-                {s}
+                {s.replace('_', ' ')}
               </option>
             ))}
           </select>
         </label>
-        <label style={{ fontSize: 14 }}>
+        <label className="field" style={{ minWidth: 180 }}>
           Due date (day)
           <input
             type="date"
+            className="input"
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
-            style={{ marginLeft: 8, padding: '0.35rem' }}
           />
         </label>
+        {(statusFilter || dateFilter) && (
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            onClick={() => {
+              setStatusFilter('')
+              setDateFilter('')
+            }}
+          >
+            Clear filters
+          </button>
+        )}
       </div>
 
       {isAdmin && (
-        <form
-          onSubmit={onCreate}
-          style={{
-            background: '#fff',
-            border: '1px solid #e2e8f0',
-            borderRadius: 12,
-            padding: '1rem',
-            display: 'grid',
-            gap: 10,
-            maxWidth: 480,
-          }}
-        >
-          <strong>New task</strong>
-          <input
-            placeholder="Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            maxLength={200}
-            required
-            style={{ padding: '0.5rem' }}
-          />
-          <textarea
-            placeholder="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            maxLength={2000}
-            rows={3}
-            style={{ padding: '0.5rem' }}
-          />
-          <input
-            type="datetime-local"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-          />
+        <form onSubmit={onCreate} className="card stack-sm" style={{ maxWidth: 520 }}>
+          <h2>New task</h2>
+          <label className="field">
+            Title
+            <input
+              className="input"
+              placeholder="e.g. Engine room inspection"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              maxLength={200}
+              required
+            />
+          </label>
+          <label className="field">
+            Description
+            <textarea
+              className="textarea"
+              placeholder="Optional details"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              maxLength={2000}
+              rows={3}
+            />
+          </label>
+          <label className="field">
+            Due date
+            <input
+              type="datetime-local"
+              className="input"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+            />
+          </label>
           {formError && <ErrorBanner message={formError} />}
-          <button
-            type="submit"
-            disabled={createTask.isPending}
-            style={{
-              padding: '0.5rem',
-              background: '#0369a1',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 8,
-            }}
-          >
+          <button type="submit" disabled={createTask.isPending} className="btn btn-primary">
             {createTask.isPending ? 'Creating…' : 'Create task'}
           </button>
         </form>
@@ -295,114 +281,100 @@ export function MaintenancePage() {
       {mutationError && <ErrorBanner message={mutationError} />}
 
       {isLoading ? (
-        <p>Loading tasks…</p>
+        <div className="card skeleton" style={{ height: 220 }} />
       ) : (
-        <div
-          style={{
-            overflowX: 'auto',
-            background: '#fff',
-            border: '1px solid #e2e8f0',
-            borderRadius: 12,
-          }}
-        >
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-            <thead>
-              <tr style={{ textAlign: 'left', background: '#f8fafc' }}>
-                <th style={th}>Title</th>
-                <th style={th}>Status</th>
-                <th style={th}>Due</th>
-                <th style={th}>Assignee</th>
-                <th style={th}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(tasks ?? []).map((t) => (
-                <>
-                  <tr key={t.id} style={{ borderTop: '1px solid #e2e8f0' }}>
-                    <td style={td}>
-                      <button
-                        type="button"
-                        onClick={() => setExpandedTask(expandedTask === t.id ? null : t.id)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          cursor: 'pointer',
-                          padding: 0,
-                          textAlign: 'left',
-                          fontWeight: 500,
-                          color: '#0369a1',
-                          fontSize: 'inherit',
-                        }}
-                      >
-                        {expandedTask === t.id ? '▾' : '▸'} {t.title}
-                      </button>
-                      {t.description && (
-                        <div style={{ color: '#64748b', fontSize: 12, marginTop: 2 }}>
-                          {t.description}
-                        </div>
-                      )}
-                    </td>
-                    <td style={td}>{t.status}</td>
-                    <td style={td}>
-                      {t.dueDate ? new Date(t.dueDate).toLocaleString() : '—'}
-                    </td>
-                    <td style={td}>{t.assignee?.name ?? '—'}</td>
-                    <td style={td}>
-                      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                        <select
-                          value={t.status}
-                          onChange={(e) =>
-                            patchStatus.mutate({ id: t.id, status: e.target.value as TaskStatus })
-                          }
-                          style={{ padding: '0.25rem' }}
+        <div className="card card-flush">
+          <div className="table-scroll">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Status</th>
+                  <th>Due</th>
+                  <th>Assignee</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(tasks ?? []).map((t) => (
+                  <Fragment key={t.id}>
+                    <tr>
+                      <td>
+                        <button
+                          type="button"
+                          className="title-link"
+                          onClick={() => setExpandedTask(expandedTask === t.id ? null : t.id)}
                         >
-                          {STATUSES.map((s) => (
-                            <option key={s} value={s}>
-                              {s}
-                            </option>
-                          ))}
-                        </select>
-                        {isAdmin && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (confirm(`Delete "${t.title}"?`)) deleteTask.mutate(t.id)
-                            }}
-                            style={{
-                              padding: '0.25rem 0.5rem',
-                              background: '#fef2f2',
-                              color: '#b91c1c',
-                              border: '1px solid #fca5a5',
-                              borderRadius: 6,
-                              cursor: 'pointer',
-                              fontSize: 12,
-                            }}
-                          >
-                            Delete
-                          </button>
+                          {expandedTask === t.id ? '▾' : '▸'} {t.title}
+                        </button>
+                        {t.description && <div className="task-description">{t.description}</div>}
+                      </td>
+                      <td>
+                        <span className={statusBadgeClass(t.status)}>
+                          {t.status.replace('_', ' ')}
+                        </span>
+                        {isOverdue(t) && (
+                          <span className="badge badge-overdue" style={{ marginLeft: 6 }}>
+                            Overdue
+                          </span>
                         )}
-                      </div>
-                    </td>
-                  </tr>
-                  {expandedTask === t.id && (
-                    <tr key={`${t.id}-comments`} style={{ borderTop: '1px solid #e2e8f0' }}>
-                      <td colSpan={5} style={{ padding: '0.5rem 0.65rem' }}>
-                        <CommentsPanel task={t} />
+                      </td>
+                      <td>
+                        {t.dueDate ? (
+                          <span className={isOverdue(t) ? '' : 'muted'} style={{ fontSize: '0.85rem' }}>
+                            {new Date(t.dueDate).toLocaleString()}
+                          </span>
+                        ) : (
+                          <span className="muted">—</span>
+                        )}
+                      </td>
+                      <td>
+                        {t.assignee?.name ?? <span className="muted">Unassigned</span>}
+                      </td>
+                      <td>
+                        <div className="row" style={{ gap: 6 }}>
+                          <select
+                            className="select select-sm"
+                            value={t.status}
+                            onChange={(e) =>
+                              patchStatus.mutate({ id: t.id, status: e.target.value as TaskStatus })
+                            }
+                          >
+                            {STATUSES.map((s) => (
+                              <option key={s} value={s}>
+                                {s.replace('_', ' ')}
+                              </option>
+                            ))}
+                          </select>
+                          {isAdmin && (
+                            <button
+                              type="button"
+                              className="btn btn-danger btn-sm"
+                              onClick={() => {
+                                if (confirm(`Delete "${t.title}"?`)) deleteTask.mutate(t.id)
+                              }}
+                            >
+                              Delete
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
-                  )}
-                </>
-              ))}
-            </tbody>
-          </table>
-          {(tasks ?? []).length === 0 && (
-            <p style={{ padding: '0.75rem', color: '#64748b', fontSize: 14 }}>No tasks found.</p>
-          )}
+                    {expandedTask === t.id && (
+                      <tr>
+                        <td colSpan={5} style={{ background: 'var(--color-surface-alt)' }}>
+                          <CommentsPanel task={t} />
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {(tasks ?? []).length === 0 && <div className="alert-empty">No tasks found.</div>}
         </div>
       )}
     </div>
   )
 }
-
-const th: CSSProperties = { padding: '0.65rem', fontWeight: 600 }
-const td: CSSProperties = { padding: '0.65rem', verticalAlign: 'top' }

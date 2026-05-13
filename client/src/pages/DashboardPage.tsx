@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../api/client'
 import type { ComplianceResponse } from '../api/types'
@@ -11,7 +10,19 @@ import {
   Tooltip,
   XAxis,
   YAxis,
+  Cell,
 } from 'recharts'
+
+function scoreColor(score: number | null): string {
+  if (score === null) return 'var(--color-text-faint)'
+  if (score >= 80) return 'var(--color-success)'
+  if (score >= 50) return 'var(--color-warning)'
+  return 'var(--color-danger)'
+}
+
+function fmtScore(score: number | null): string {
+  return score === null ? 'n/a' : `${score.toFixed(1)}%`
+}
 
 export function DashboardPage() {
   const { effectiveShipId, shipQuery } = useShipScope()
@@ -28,73 +39,133 @@ export function DashboardPage() {
   })
 
   if (!effectiveShipId) {
-    return <p>Select a ship (admin) or ensure your user is assigned to a vessel.</p>
+    return (
+      <div className="card alert-empty">
+        Select a ship (admin) or ensure your user is assigned to a vessel.
+      </div>
+    )
   }
 
-  if (isLoading) return <p>Loading compliance…</p>
-  if (error || !data) return <p>Could not load compliance.</p>
+  if (isLoading) {
+    return (
+      <div className="stack">
+        <h1>Dashboard</h1>
+        <div className="grid-cards">
+          <div className="card skeleton" style={{ height: 110 }} />
+          <div className="card skeleton" style={{ height: 110 }} />
+        </div>
+        <div className="card skeleton" style={{ height: 260 }} />
+      </div>
+    )
+  }
+  if (error || !data) return <div className="alert alert-error">Could not load compliance.</div>
 
   const chartData = [
-    { name: 'Maintenance', value: data.maintenanceScore ?? 0 },
-    { name: 'Drills', value: data.drillScore ?? 0 },
+    { name: 'Maintenance', value: data.maintenanceScore ?? 0, score: data.maintenanceScore },
+    { name: 'Drills', value: data.drillScore ?? 0, score: data.drillScore },
   ]
 
+  const maintenanceAccent =
+    data.maintenanceScore !== null && data.maintenanceScore < 50
+      ? 'card card-accent-danger'
+      : data.maintenanceScore !== null && data.maintenanceScore < 80
+      ? 'card card-accent-warning'
+      : 'card card-accent'
+  const drillAccent =
+    data.drillScore !== null && data.drillScore < 50
+      ? 'card card-accent-danger'
+      : data.drillScore !== null && data.drillScore < 80
+      ? 'card card-accent-warning'
+      : 'card card-accent'
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-      <h1 style={{ margin: 0 }}>Dashboard</h1>
-      <p style={{ margin: 0, color: '#475569' }}>
-        Scores use all tasks and drills for this ship. Empty denominators show as{' '}
-        <em>n/a</em> in the API (<code>null</code>).
-      </p>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '1rem',
-        }}
-      >
-        <div style={card}>
-          <div style={label}>Maintenance compliance</div>
-          <div style={score}>
-            {data.maintenanceScore === null ? 'n/a' : `${data.maintenanceScore.toFixed(1)}%`}
+    <div className="stack">
+      <div>
+        <h1>Dashboard</h1>
+        <p className="muted text-sm" style={{ marginTop: 4 }}>
+          Compliance summary for the selected ship.
+        </p>
+      </div>
+
+      <div className="grid-cards">
+        <div className={maintenanceAccent}>
+          <div className="card-label">Maintenance compliance</div>
+          <div className="card-value" style={{ color: scoreColor(data.maintenanceScore) }}>
+            {fmtScore(data.maintenanceScore)}
           </div>
-          <div style={meta}>
-            {data.counts.tasksCompleted} / {data.counts.tasksTotal} tasks completed
+          <div className="card-meta">
+            {data.counts.tasksCompleted} of {data.counts.tasksTotal} tasks completed
           </div>
         </div>
-        <div style={card}>
-          <div style={label}>Drill compliance</div>
-          <div style={score}>
-            {data.drillScore === null ? 'n/a' : `${data.drillScore.toFixed(1)}%`}
+        <div className={drillAccent}>
+          <div className="card-label">Drill compliance</div>
+          <div className="card-value" style={{ color: scoreColor(data.drillScore) }}>
+            {fmtScore(data.drillScore)}
           </div>
-          <div style={meta}>
-            {data.counts.attendanceAttended} yes / {data.counts.drillsTotal} drills (see README for
-            metric)
+          <div className="card-meta">
+            {data.counts.attendanceAttended} attended of {data.counts.attendanceMarked} marked ·{' '}
+            {data.counts.drillsTotal} drills total
+          </div>
+        </div>
+        <div className={data.overdue.length > 0 ? 'card card-accent-danger' : 'card card-accent'}>
+          <div className="card-label">Overdue tasks</div>
+          <div
+            className="card-value"
+            style={{
+              color: data.overdue.length > 0 ? 'var(--color-danger)' : 'var(--color-success)',
+            }}
+          >
+            {data.overdue.length}
+          </div>
+          <div className="card-meta">
+            {data.overdue.length === 0 ? 'All on track' : 'Need attention now'}
           </div>
         </div>
       </div>
-      <div style={{ ...card, minHeight: 280 }}>
-        <div style={label}>Scores overview</div>
-        <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis domain={[0, 100]} unit="%" />
-            <Tooltip formatter={(v: number) => [`${v.toFixed(1)}%`, 'Score']} />
-            <Bar dataKey="value" fill="#0369a1" radius={[6, 6, 0, 0]} />
+
+      <div className="card">
+        <div className="card-label">Scores overview</div>
+        <ResponsiveContainer width="100%" height={240}>
+          <BarChart data={chartData} margin={{ top: 16, right: 16, left: -10, bottom: 4 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+            <XAxis dataKey="name" tick={{ fill: 'var(--color-text-muted)', fontSize: 12 }} />
+            <YAxis
+              domain={[0, 100]}
+              unit="%"
+              tick={{ fill: 'var(--color-text-muted)', fontSize: 12 }}
+            />
+            <Tooltip
+              formatter={(_v: number, _n, p) => [fmtScore(p.payload.score), 'Score']}
+              contentStyle={{
+                borderRadius: 8,
+                border: '1px solid var(--color-border)',
+                fontSize: 13,
+              }}
+            />
+            <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+              {chartData.map((d, i) => (
+                <Cell key={i} fill={scoreColor(d.score)} />
+              ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <div style={card}>
-        <div style={label}>Overdue maintenance</div>
+
+      <div className={data.overdue.length > 0 ? 'card card-accent-danger' : 'card'}>
+        <div className="card-label">Overdue maintenance</div>
         {data.overdue.length === 0 ? (
-          <p style={{ margin: 0, color: '#15803d' }}>No overdue tasks.</p>
+          <p className="muted">No overdue tasks. </p>
         ) : (
           <ul style={{ margin: 0, paddingLeft: '1.1rem' }}>
             {data.overdue.map((t) => (
-              <li key={t.id}>
-                {t.title}
-                {t.dueDate ? ` — due ${new Date(t.dueDate).toLocaleDateString()}` : ''}
+              <li key={t.id} style={{ marginBottom: 4 }}>
+                <span style={{ fontWeight: 500 }}>{t.title}</span>
+                {t.dueDate && (
+                  <span className="muted text-sm">
+                    {' '}
+                    — due {new Date(t.dueDate).toLocaleDateString()}
+                  </span>
+                )}
               </li>
             ))}
           </ul>
@@ -102,29 +173,4 @@ export function DashboardPage() {
       </div>
     </div>
   )
-}
-
-const card: CSSProperties = {
-  background: '#fff',
-  border: '1px solid #e2e8f0',
-  borderRadius: 12,
-  padding: '1rem 1.1rem',
-}
-
-const label: CSSProperties = {
-  fontSize: 13,
-  color: '#64748b',
-  marginBottom: 6,
-}
-
-const score: CSSProperties = {
-  fontSize: '1.75rem',
-  fontWeight: 700,
-  color: '#0f172a',
-}
-
-const meta: CSSProperties = {
-  fontSize: 13,
-  color: '#64748b',
-  marginTop: 8,
 }

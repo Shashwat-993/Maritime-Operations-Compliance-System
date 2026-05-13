@@ -8,20 +8,13 @@ import { useAuth } from '../context/AuthContext'
 const TYPES: DrillType[] = ['FIRE', 'EVACUATION', 'MOB']
 
 function ErrorBanner({ message }: { message: string }) {
-  return (
-    <div
-      style={{
-        background: '#fef2f2',
-        border: '1px solid #fca5a5',
-        borderRadius: 8,
-        padding: '0.6rem 0.9rem',
-        color: '#b91c1c',
-        fontSize: 14,
-      }}
-    >
-      {message}
-    </div>
-  )
+  return <div className="alert alert-error">{message}</div>
+}
+
+function drillBadgeClass(t: DrillType): string {
+  if (t === 'FIRE') return 'badge badge-fire'
+  if (t === 'EVACUATION') return 'badge badge-evacuation'
+  return 'badge badge-mob'
 }
 
 export function DrillsPage() {
@@ -111,61 +104,64 @@ export function DrillsPage() {
   }
 
   if (!effectiveShipId) {
-    return <p>Select a ship (admin) or ensure your user is assigned to a vessel.</p>
+    return <div className="card alert-empty">Select a ship (admin) or ensure your user is assigned to a vessel.</div>
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-      <h1 style={{ margin: 0 }}>Drills</h1>
-      <label style={{ fontSize: 14 }}>
-        Scheduled day filter
-        <input
-          type="date"
-          value={dateFilter}
-          onChange={(e) => setDateFilter(e.target.value)}
-          style={{ marginLeft: 8, padding: '0.35rem' }}
-        />
-      </label>
+    <div className="stack">
+      <div>
+        <h1>Drills</h1>
+        <p className="muted text-sm" style={{ marginTop: 4 }}>
+          Schedule safety drills and log crew attendance.
+        </p>
+      </div>
+
+      <div className="card row" style={{ alignItems: 'flex-end' }}>
+        <label className="field" style={{ minWidth: 200 }}>
+          Scheduled day filter
+          <input
+            type="date"
+            className="input"
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value)}
+          />
+        </label>
+        {dateFilter && (
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setDateFilter('')}>
+            Clear filter
+          </button>
+        )}
+      </div>
 
       {isAdmin && (
-        <form
-          onSubmit={onCreate}
-          style={{
-            background: '#fff',
-            border: '1px solid #e2e8f0',
-            borderRadius: 12,
-            padding: '1rem',
-            display: 'grid',
-            gap: 10,
-            maxWidth: 480,
-          }}
-        >
-          <strong>Schedule drill</strong>
-          <select value={type} onChange={(e) => setType(e.target.value as DrillType)}>
-            {TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-          <input
-            type="datetime-local"
-            value={scheduled}
-            onChange={(e) => setScheduled(e.target.value)}
-            required
-          />
+        <form onSubmit={onCreate} className="card stack-sm" style={{ maxWidth: 520 }}>
+          <h2>Schedule drill</h2>
+          <label className="field">
+            Type
+            <select
+              className="select"
+              value={type}
+              onChange={(e) => setType(e.target.value as DrillType)}
+            >
+              {TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            Scheduled date
+            <input
+              type="datetime-local"
+              className="input"
+              value={scheduled}
+              onChange={(e) => setScheduled(e.target.value)}
+              required
+            />
+          </label>
           {formError && <ErrorBanner message={formError} />}
-          <button
-            type="submit"
-            disabled={createDrill.isPending}
-            style={{
-              padding: '0.5rem',
-              background: '#0369a1',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 8,
-            }}
-          >
+          <button type="submit" disabled={createDrill.isPending} className="btn btn-primary">
             {createDrill.isPending ? 'Scheduling…' : 'Create drill'}
           </button>
         </form>
@@ -174,82 +170,56 @@ export function DrillsPage() {
       {mutationError && <ErrorBanner message={mutationError} />}
 
       {isLoading ? (
-        <p>Loading drills…</p>
+        <div className="card skeleton" style={{ height: 180 }} />
       ) : (
-        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 12 }}>
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 'var(--space-3)' }}>
           {(drills ?? []).length === 0 && (
-            <li style={{ color: '#64748b', fontSize: 14 }}>No drills found.</li>
+            <li className="card alert-empty">No drills found.</li>
           )}
           {(drills ?? []).map((d) => {
             const mine = user ? d.attendance.find((a) => a.userId === user.id) : undefined
+            const attendedCount = d.attendance.filter((a) => a.attended).length
             return (
-              <li
-                key={d.id}
-                style={{
-                  background: '#fff',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: 12,
-                  padding: '1rem',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div style={{ fontWeight: 600 }}>
-                    {d.type} — {new Date(d.scheduledDate).toLocaleString()}
+              <li key={d.id} className="card card-interactive">
+                <div className="row" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div className="stack-sm" style={{ gap: 4 }}>
+                    <div className="row" style={{ gap: 8 }}>
+                      <span className={drillBadgeClass(d.type)}>{d.type}</span>
+                      <strong>{new Date(d.scheduledDate).toLocaleString()}</strong>
+                    </div>
+                    <div className="muted text-sm">
+                      Attendance: {d.attendance.length} recorded
+                      {d.attendance.length > 0 && ` · ${attendedCount} attended`}
+                    </div>
                   </div>
                   {isAdmin && (
                     <button
                       type="button"
+                      className="btn btn-danger btn-sm"
                       onClick={() => {
                         if (confirm(`Delete this ${d.type} drill?`)) deleteDrill.mutate(d.id)
-                      }}
-                      style={{
-                        padding: '0.25rem 0.5rem',
-                        background: '#fef2f2',
-                        color: '#b91c1c',
-                        border: '1px solid #fca5a5',
-                        borderRadius: 6,
-                        cursor: 'pointer',
-                        fontSize: 12,
                       }}
                     >
                       Delete
                     </button>
                   )}
                 </div>
-                <div style={{ fontSize: 13, color: '#64748b', marginTop: 6 }}>
-                  Attendance recorded: {d.attendance.length}
-                  {d.attendance.length > 0 && (
-                    <span style={{ marginLeft: 8 }}>
-                      ({d.attendance.filter((a) => a.attended).length} attended)
-                    </span>
-                  )}
-                </div>
                 {user && (
-                  <div style={{ marginTop: 10, display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <span style={{ fontSize: 14 }}>Your status:</span>
+                  <div className="row" style={{ marginTop: 'var(--space-3)', gap: 8 }}>
+                    <span className="text-sm muted">Your status:</span>
                     <button
                       type="button"
+                      className={`btn btn-sm btn-success-outline${mine?.attended ? ' is-active' : ''}`}
                       onClick={() => attend.mutate({ id: d.id, attended: true })}
-                      style={{
-                        padding: '0.35rem 0.65rem',
-                        background: mine?.attended ? '#15803d' : '#e2e8f0',
-                        color: mine?.attended ? '#fff' : '#0f172a',
-                        border: 'none',
-                        borderRadius: 6,
-                      }}
                     >
                       Attended
                     </button>
                     <button
                       type="button"
+                      className={`btn btn-sm btn-danger-outline${
+                        mine && !mine.attended ? ' is-active' : ''
+                      }`}
                       onClick={() => attend.mutate({ id: d.id, attended: false })}
-                      style={{
-                        padding: '0.35rem 0.65rem',
-                        background: mine && !mine.attended ? '#b91c1c' : '#e2e8f0',
-                        color: mine && !mine.attended ? '#fff' : '#0f172a',
-                        border: 'none',
-                        borderRadius: 6,
-                      }}
                     >
                       Did not attend
                     </button>

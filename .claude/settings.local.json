@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(docker --version)",
+      "Bash(docker compose *)",
+      "Bash(npm install *)",
+      "Bash(curl -s http://localhost:4000/health)",
+      "Bash(curl -s -o /dev/null -w \"client HTTP %{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(curl -s -X POST http://localhost:4000/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"admin@example.com\",\"password\":\"password123\"}')",
+      "Bash(sleep 5 && cat /c/Users/shash/AppData/Local/Temp/claude/c--Users-shash--cursor-projects-C-Users-shash-AppData-Local-Temp-47e76057-b3f9-4dd5-87a6-f7f4315d18fc/d3e8498e-92e4-4401-9c13-66b43ff97f2f/tasks/bysmqrfw9.output)",
+      "Read(//c/Users/shash/AppData/Local/Temp/claude/c--Users-shash--cursor-projects-C-Users-shash-AppData-Local-Temp-47e76057-b3f9-4dd5-87a6-f7f4315d18fc/d3e8498e-92e4-4401-9c13-66b43ff97f2f/tasks/**)",
+      "Bash(cd .. && sleep 6 && docker compose logs server --tail=15)",
+      "Read(//c/Users/shash/.cursor/projects/**)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git fetch *)",
+      "Bash(git pull *)",
+      "Bash(git rebase *)"
+    ]
+  }
+}

@@ -10,3 +10,4 @@ coverage/
 !.vscode/extensions.json
 server/prisma/*.db
 server/prisma/*.db-journal
+.claude/

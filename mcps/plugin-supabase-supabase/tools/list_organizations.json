@@ -1,0 +1,14 @@
+{
+  "name": "list_organizations",
+  "description": "Lists all organizations that the user is a member of.",
+  "arguments": {
+    "type": "object",
+    "properties": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false
+  },
+  "plugin": "supabase",
+  "marketplace": "cursor-public",
+  "pluginId": "652",
+  "marketplaceId": "34"
+}

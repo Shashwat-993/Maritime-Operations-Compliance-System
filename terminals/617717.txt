@@ -1,0 +1,20 @@
+---
+pid: 29356
+cwd: "C:\\Users\\shash\\.cursor\\projects\\C-Users-shash-AppData-Local-Temp-47e76057-b3f9-4dd5-87a6-f7f4315d18fc"
+command: "Set-Location \"C:\\Users\\shash\\.cursor\\projects\\C-Users-shash-AppData-Local-Temp-47e76057-b3f9-4dd5-87a6-f7f4315d18fc\\server\"; npm install"
+started_at: 2026-05-12T11:10:10.835Z
+running_for_ms: 305390   
+---
+
+added 143 packages, and audited 144 packages in 57s
+
+23 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+---
+exit_code: 0
+elapsed_ms: 305837
+ended_at: 2026-05-12T11:15:16.672Z
+---

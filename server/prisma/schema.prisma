@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CREW
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum DrillType {
+  FIRE
+  EVACUATION
+  MOB
+}
+
+model Ship {
+  id        String   @id @default(uuid())
+  name      String
+  imoNumber String   @unique @map("imo_number")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  users            User[]
+  maintenanceTasks MaintenanceTask[]
+  drills           Drill[]
+
+  @@map("ships")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         Role
+  shipId       String?  @map("ship_id")
+  ship         Ship?    @relation(fields: [shipId], references: [id], onDelete: SetNull)
+
+  assignedTasks   MaintenanceTask[] @relation("AssignedTasks")
+  comments        TaskComment[]
+  drillAttendance DrillAttendance[]
+
+  @@map("users")
+}
+
+model MaintenanceTask {
+  id          String      @id @default(uuid())
+  shipId      String      @map("ship_id")
+  ship        Ship        @relation(fields: [shipId], references: [id], onDelete: Cascade)
+  assignedTo  String?     @map("assigned_to")
+  assignee    User?       @relation("AssignedTasks", fields: [assignedTo], references: [id], onDelete: SetNull)
+  title       String
+  description String?
+  status      TaskStatus
+  dueDate     DateTime?   @map("due_date")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  comments    TaskComment[]
+
+  @@index([dueDate])
+  @@index([status])
+
+  @@map("maintenance_tasks")
+}
+
+model TaskComment {
+  id        String          @id @default(uuid())
+  taskId    String          @map("task_id")
+  task      MaintenanceTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  userId    String          @map("user_id")
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  note      String
+  createdAt DateTime        @default(now()) @map("created_at")
+  updatedAt DateTime        @updatedAt @map("updated_at")
+
+  @@map("task_comments")
+}
+
+model Drill {
+  id            String      @id @default(uuid())
+  shipId        String      @map("ship_id")
+  ship          Ship        @relation(fields: [shipId], references: [id], onDelete: Cascade)
+  type          DrillType
+  scheduledDate DateTime    @map("scheduled_date")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  attendance    DrillAttendance[]
+
+  @@index([scheduledDate])
+
+  @@map("drills")
+}
+
+model DrillAttendance {
+  id          String   @id @default(uuid())
+  drillId     String   @map("drill_id")
+  drill       Drill    @relation(fields: [drillId], references: [id], onDelete: Cascade)
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attended    Boolean
+  submittedAt DateTime @default(now()) @map("submitted_at")
+
+  @@unique([drillId, userId])
+  @@map("drill_attendance")
+}

@@ -1,0 +1,21 @@
+{
+  "name": "list_extensions",
+  "description": "Lists all extensions in the database.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "project_id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "project_id"
+    ],
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false
+  },
+  "plugin": "supabase",
+  "marketplace": "cursor-public",
+  "pluginId": "652",
+  "marketplaceId": "34"
+}

@@ -1,0 +1,21 @@
+{
+  "name": "rebase_branch",
+  "description": "Rebases a development branch on production. This will effectively run any newer migrations from production onto this branch to help handle migration drift.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "branch_id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "branch_id"
+    ],
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false
+  },
+  "plugin": "supabase",
+  "marketplace": "cursor-public",
+  "pluginId": "652",
+  "marketplaceId": "34"
+}

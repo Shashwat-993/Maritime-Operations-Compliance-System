@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: maritime-server
+    env: docker
+    region: oregon
+    plan: free
+    repo: https://github.com/<your>/<repo>
+    branch: main
+    dockerfilePath: server/Dockerfile
+    envVars:
+      - key: DATABASE_URL
+      - key: JWT_SECRET
+  - type: web
+    name: maritime-client
+    env: docker
+    region: oregon
+    plan: free
+    repo: https://github.com/<your>/<repo>
+    branch: main
+    dockerfilePath: client/Dockerfile
+    envVars:
+      - key: VITE_API_URL
+
+# Replace <your>/<repo> with your GitHub repository path before using this manifest.

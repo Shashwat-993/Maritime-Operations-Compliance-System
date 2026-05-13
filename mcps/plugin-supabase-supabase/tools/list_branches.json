@@ -1,0 +1,21 @@
+{
+  "name": "list_branches",
+  "description": "Lists all development branches of a Supabase project. This will return branch details including status which you can use to check when operations like merge/rebase/reset complete.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "project_id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "project_id"
+    ],
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false
+  },
+  "plugin": "supabase",
+  "marketplace": "cursor-public",
+  "pluginId": "652",
+  "marketplaceId": "34"
+}

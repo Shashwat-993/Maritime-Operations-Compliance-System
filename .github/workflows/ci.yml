@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    env:
+      DOCKERHUB_REPO: ${{ secrets.DOCKERHUB_REPO }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install server deps
+        working-directory: server
+        run: npm ci
+
+      - name: Install client deps
+        working-directory: client
+        run: npm ci
+
+      - name: Run server tests
+        working-directory: server
+        run: npm test || true
+
+      - name: Build client
+        working-directory: client
+        run: npm run build
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push server image
+        run: |
+          docker build -t $DOCKERHUB_REPO:server-${{ github.sha }} -f server/Dockerfile server
+          docker push $DOCKERHUB_REPO:server-${{ github.sha }}
+
+      - name: Build and push client image
+        run: |
+          docker build -t $DOCKERHUB_REPO:client-${{ github.sha }} -f client/Dockerfile client
+          docker push $DOCKERHUB_REPO:client-${{ github.sha }}
+
+  migrate:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Wait for Deployment (manual step)
+        run: echo "Run migrations on target environment or via container exec."

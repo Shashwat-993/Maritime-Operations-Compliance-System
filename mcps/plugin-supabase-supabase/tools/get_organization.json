@@ -1,0 +1,22 @@
+{
+  "name": "get_organization",
+  "description": "Gets details for an organization. Includes subscription plan.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "description": "The organization ID",
+        "type": "string"
+      }
+    },
+    "required": [
+      "id"
+    ],
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false
+  },
+  "plugin": "supabase",
+  "marketplace": "cursor-public",
+  "pluginId": "652",
+  "marketplaceId": "34"
+}

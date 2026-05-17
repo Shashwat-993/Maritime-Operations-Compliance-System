@@ -11,3 +11,4 @@ coverage/
 server/prisma/*.db
 server/prisma/*.db-journal
 .claude/
+.settings/

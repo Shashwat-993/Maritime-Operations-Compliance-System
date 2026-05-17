@@ -9,6 +9,7 @@ import drillRoutes from './routes/drillRoutes.js'
 import complianceRoutes from './routes/complianceRoutes.js'
 import shipRoutes from './routes/shipRoutes.js'
 import userRoutes from './routes/userRoutes.js'
+import { ensureDemoUsers } from './lib/bootstrap.js'
 
 const app = express()
 const port = Number(process.env.PORT ?? 4000)
@@ -49,4 +50,5 @@ process.on('unhandledRejection', (reason) => {
 
 app.listen(port, () => {
   console.log(`API listening on http://localhost:${port}`)
+  ensureDemoUsers().catch((err) => console.error('[bootstrap] ensureDemoUsers failed', err))
 })

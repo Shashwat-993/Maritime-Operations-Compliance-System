@@ -1,19 +1,19 @@
 :root {
-  --color-bg: #f8fafc;
+  --color-bg: #f5f7fa;
   --color-surface: #ffffff;
-  --color-surface-alt: #f1f5f9;
-  --color-border: #e2e8f0;
+  --color-surface-alt: #f7f8fa;
+  --color-border: #e4e7ec;
   --color-border-strong: #cbd5e1;
 
-  --color-text: #0f172a;
+  --color-text: #0d1117;
   --color-text-muted: #475569;
-  --color-text-subtle: #64748b;
-  --color-text-faint: #94a3b8;
+  --color-text-subtle: #5a6476;
+  --color-text-faint: #9aa3b0;
 
-  --color-primary: #0369a1;
-  --color-primary-hover: #075985;
-  --color-primary-soft: #e0f2fe;
-  --color-primary-deep: #0c4a6e;
+  --color-primary: #185fa5;
+  --color-primary-hover: #134d8a;
+  --color-primary-soft: #e6f1fb;
+  --color-primary-deep: #042c53;
 
   --color-success: #15803d;
   --color-success-soft: #dcfce7;
@@ -41,7 +41,8 @@
   --shadow-md: 0 4px 12px rgb(15 23 42 / 6%);
   --shadow-lg: 0 12px 32px rgb(15 23 42 / 10%);
 
-  --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-sans: 'DM Sans', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-serif: 'DM Serif Display', Georgia, 'Times New Roman', serif;
   --transition: 150ms ease;
 
   font-family: var(--font-sans);
@@ -64,16 +65,20 @@ body {
 
 h1, h2, h3 {
   margin: 0;
-  font-weight: 600;
+  font-family: var(--font-serif);
+  font-weight: 400;
   letter-spacing: 0;
+  color: var(--color-text);
 }
 
 h1 {
-  font-size: 1.6rem;
+  font-size: 1.875rem;
+  line-height: 1.2;
 }
 
 h2 {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
+  line-height: 1.3;
 }
 
 h3 {
@@ -152,14 +157,19 @@ code {
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: 10px;
   padding: var(--space-5);
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--transition), transform var(--transition);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 3%);
+  transition: box-shadow var(--transition), border-color var(--transition);
+}
+
+.card-interactive {
+  cursor: pointer;
 }
 
 .card-interactive:hover {
-  box-shadow: var(--shadow-md);
+  border-color: #c8d8ec;
+  box-shadow: 0 4px 14px rgb(24 95 165 / 8%);
 }
 
 .card-flush {
@@ -180,23 +190,24 @@ code {
 }
 
 .card-label {
-  font-size: 0.8rem;
-  color: var(--color-text-subtle);
+  font-size: 0.7rem;
+  color: var(--color-text-faint);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  font-weight: 600;
+  letter-spacing: 0.1em;
+  font-weight: 500;
   margin-bottom: var(--space-2);
 }
 
 .card-value {
-  font-size: 2rem;
-  font-weight: 700;
+  font-family: var(--font-serif);
+  font-size: 2.4rem;
+  font-weight: 400;
   color: var(--color-text);
-  line-height: 1.1;
+  line-height: 1.05;
 }
 
 .card-meta {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--color-text-subtle);
   margin-top: var(--space-2);
 }
@@ -227,11 +238,13 @@ code {
   background: var(--color-primary);
   color: #fff;
   border-color: var(--color-primary);
+  box-shadow: 0 2px 8px rgb(24 95 165 / 20%);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--color-primary-hover);
-  border-color: var(--color-primary-hover);
+  background: #2a7dd1;
+  border-color: #2a7dd1;
+  box-shadow: 0 4px 14px rgb(24 95 165 / 28%);
 }
 
 .btn-ghost {
@@ -309,12 +322,19 @@ code {
 .select,
 .textarea {
   width: 100%;
-  padding: 0.5rem 0.65rem;
-  border: 1px solid var(--color-border-strong);
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
   font-size: 0.9rem;
   transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--color-text-faint);
 }
 
 .input:focus,
@@ -322,7 +342,7 @@ code {
 .textarea:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-soft);
+  box-shadow: 0 0 0 3px rgb(24 95 165 / 10%);
 }
 
 .textarea {
@@ -391,10 +411,10 @@ code {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.2rem 0.55rem;
+  padding: 0.18rem 0.55rem;
   border-radius: var(--radius-pill);
-  font-size: 0.72rem;
-  font-weight: 600;
+  font-size: 0.7rem;
+  font-weight: 500;
   letter-spacing: 0.02em;
   text-transform: uppercase;
   border: 1px solid transparent;
@@ -445,13 +465,13 @@ code {
 }
 
 .badge-role-admin {
-  background: var(--color-primary-soft);
-  color: var(--color-primary-deep);
+  background: #e6f1fb;
+  color: #0c447c;
 }
 
 .badge-role-crew {
-  background: var(--color-surface-alt);
-  color: var(--color-text-muted);
+  background: #e1f5ee;
+  color: #085041;
 }
 
 /* ===== Tables ===== */
@@ -465,19 +485,20 @@ code {
 .table th {
   text-align: left;
   background: var(--color-surface-alt);
-  color: var(--color-text-muted);
-  font-weight: 600;
-  padding: 0.75rem;
-  font-size: 0.78rem;
+  color: var(--color-text-faint);
+  font-weight: 500;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.1em;
   border-bottom: 1px solid var(--color-border);
 }
 
 .table td {
-  padding: 0.75rem;
+  padding: 0.85rem;
   vertical-align: top;
   border-top: 1px solid var(--color-border);
+  color: var(--color-text);
 }
 
 .table tbody tr {
@@ -485,7 +506,7 @@ code {
 }
 
 .table tbody tr:hover {
-  background: var(--color-surface-alt);
+  background: #fafcff;
 }
 
 .table-scroll {
@@ -530,37 +551,48 @@ code {
 .app-header {
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
-  padding: 0.85rem 1.5rem;
+  padding: 0.85rem 1.75rem;
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: 1.25rem;
   flex-wrap: wrap;
   position: sticky;
   top: 0;
   z-index: 10;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 4%);
 }
 
 .app-brand {
-  font-weight: 700;
-  color: var(--color-text);
-  letter-spacing: -0.01em;
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 0.625rem;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 1.1rem;
+  color: var(--color-text);
+  letter-spacing: 0;
 }
 
 .app-brand-mark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-deep));
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--color-primary);
   color: #fff;
-  font-size: 0.85rem;
-  font-weight: 700;
+  box-shadow: 0 4px 12px rgb(24 95 165 / 30%);
+}
+
+.app-brand-mark svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .app-nav {
@@ -571,9 +603,9 @@ code {
 }
 
 .nav-link {
-  padding: 0.45rem 0.75rem;
-  border-radius: var(--radius-md);
-  color: var(--color-text-muted);
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  color: var(--color-text-subtle);
   font-weight: 500;
   font-size: 0.9rem;
   transition: background var(--transition), color var(--transition);
@@ -587,31 +619,34 @@ code {
 
 .nav-link.is-active {
   background: var(--color-primary-soft);
-  color: var(--color-primary-deep);
-  font-weight: 600;
+  color: var(--color-primary);
+  font-weight: 500;
 }
 
 .user-chip {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: 0.25rem 0.5rem 0.25rem 0.25rem;
+  gap: 0.55rem;
+  padding: 0.25rem 0.75rem 0.25rem 0.3rem;
   border-radius: var(--radius-pill);
   background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
   font-size: 0.85rem;
+  color: var(--color-text);
 }
 
 .user-avatar {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: var(--color-primary);
-  color: #fff;
+  background: #0c447c;
+  color: #b5d4f4;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
 }
 
 .app-main {

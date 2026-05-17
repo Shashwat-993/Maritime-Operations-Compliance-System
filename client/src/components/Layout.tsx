@@ -21,7 +21,14 @@ export function Layout() {
     <div className="app-shell">
       <header className="app-header">
         <span className="app-brand">
-          <span className="app-brand-mark" aria-hidden="true">MO</span>
+          <span className="app-brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img">
+              <circle cx="12" cy="5" r="2" />
+              <path d="M12 7v14" />
+              <path d="M5 12H3a9 9 0 0 0 18 0h-2" />
+              <path d="M9 19l3 2 3-2" />
+            </svg>
+          </span>
           Maritime Ops
         </span>
         <nav className="app-nav" aria-label="Main">

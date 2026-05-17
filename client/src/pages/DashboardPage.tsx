@@ -176,8 +176,12 @@ export function DashboardPage() {
               contentStyle={{
                 borderRadius: 8,
                 border: '1px solid var(--color-border)',
+                background: 'var(--color-surface)',
+                color: 'var(--color-text)',
                 fontSize: 13,
               }}
+              labelStyle={{ color: 'var(--color-text)' }}
+              itemStyle={{ color: 'var(--color-text)' }}
             />
             <Bar dataKey="value" radius={[8, 8, 0, 0]}>
               {chartData.map((d, i) => (

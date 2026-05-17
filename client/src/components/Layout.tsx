@@ -2,6 +2,7 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../context/AuthContext'
 import { useShipScope } from '../hooks/useShipScope'
+import { useTheme } from '../context/ThemeContext'
 import { api } from '../api/client'
 import type { ComplianceResponse } from '../api/types'
 
@@ -18,6 +19,7 @@ function initials(name: string | undefined): string {
 
 export function Layout() {
   const { user, logout } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const { isAdmin, ships, adminShipId, setAdminShipId, effectiveShipId, shipQuery } = useShipScope()
 
   const { data: compliance } = useQuery({
@@ -95,6 +97,31 @@ export function Layout() {
             </span>
           </span>
         </span>
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="btn btn-ghost btn-sm theme-toggle"
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {theme === 'dark' ? (
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2" />
+              <path d="M12 20v2" />
+              <path d="M4.93 4.93l1.41 1.41" />
+              <path d="M17.66 17.66l1.41 1.41" />
+              <path d="M2 12h2" />
+              <path d="M20 12h2" />
+              <path d="M4.93 19.07l1.41-1.41" />
+              <path d="M17.66 6.34l1.41-1.41" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          )}
+        </button>
         <button type="button" onClick={logout} className="btn btn-ghost btn-sm">
           Log out
         </button>

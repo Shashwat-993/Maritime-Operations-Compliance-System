@@ -3,8 +3,6 @@ import { Navigate } from 'react-router-dom'
 import axios from 'axios'
 import { useAuth } from '../context/AuthContext'
 
-const isDev = import.meta.env.DEV
-
 type DemoAccount = {
   name: string
   initials: string
@@ -55,10 +53,10 @@ const features: { paths: string[]; label: string }[] = [
 
 export function LoginPage() {
   const { token, login, loading } = useAuth()
-  const [email, setEmail] = useState(isDev ? demoAccounts[0].email : '')
-  const [password, setPassword] = useState(isDev ? 'password123' : '')
+  const [email, setEmail] = useState(demoAccounts[0].email)
+  const [password, setPassword] = useState('password123')
   const [showPassword, setShowPassword] = useState(false)
-  const [selectedDemo, setSelectedDemo] = useState<string | null>(isDev ? demoAccounts[0].email : null)
+  const [selectedDemo, setSelectedDemo] = useState<string | null>(demoAccounts[0].email)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const errorRef = useRef<HTMLDivElement>(null)
@@ -205,36 +203,34 @@ export function LoginPage() {
             {submitting ? 'Signing in…' : 'Sign In'}
           </button>
 
-          {isDev && (
-            <div className="auth-demo" aria-label="Demo accounts">
-              <div className="auth-demo-title">
-                <span />
-                <strong>Demo Accounts</strong>
-                <span />
-              </div>
-              <div className="auth-demo-list">
-                {demoAccounts.map((account) => (
-                  <button
-                    key={account.email}
-                    type="button"
-                    className={`auth-demo-account${selectedDemo === account.email ? ' is-selected' : ''}`}
-                    onClick={() => selectDemoAccount(account)}
-                    aria-pressed={selectedDemo === account.email}
-                  >
-                    <span className={`auth-demo-avatar auth-demo-avatar-${account.role}`} aria-hidden="true">
-                      {account.initials}
-                    </span>
-                    <span className="auth-demo-text">
-                      <strong>{account.name}</strong>
-                      <span>{account.title} · {account.email}</span>
-                    </span>
-                    <span className={`auth-demo-role auth-demo-role-${account.role}`}>{account.role}</span>
-                  </button>
-                ))}
-              </div>
-              <p className="auth-hint">Click a demo account to auto-fill, then press Sign In</p>
+          <div className="auth-demo" aria-label="Demo accounts">
+            <div className="auth-demo-title">
+              <span />
+              <strong>Demo Accounts</strong>
+              <span />
             </div>
-          )}
+            <div className="auth-demo-list">
+              {demoAccounts.map((account) => (
+                <button
+                  key={account.email}
+                  type="button"
+                  className={`auth-demo-account${selectedDemo === account.email ? ' is-selected' : ''}`}
+                  onClick={() => selectDemoAccount(account)}
+                  aria-pressed={selectedDemo === account.email}
+                >
+                  <span className={`auth-demo-avatar auth-demo-avatar-${account.role}`} aria-hidden="true">
+                    {account.initials}
+                  </span>
+                  <span className="auth-demo-text">
+                    <strong>{account.name}</strong>
+                    <span>{account.title} · {account.email}</span>
+                  </span>
+                  <span className={`auth-demo-role auth-demo-role-${account.role}`}>{account.role}</span>
+                </button>
+              ))}
+            </div>
+            <p className="auth-hint">Click a demo account to auto-fill, then press Sign In</p>
+          </div>
         </form>
       </section>
      </div>

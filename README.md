@@ -51,8 +51,8 @@ After `npm run db:seed`:
 
 | Email | Password | Role |
 |-------|----------|------|
-| admin@example.com | password123 | ADMIN |
-| crew@example.com | password123 | CREW (assigned to first ship) |
+| admin@fathommarine.com | password123 | ADMIN (Captain Nipun Chatrath) |
+| crew@fathommarine.com | password123 | CREW – Chief Engineer (Shashwat Pal), assigned to first ship |
 
 ## Compliance API semantics
 
@@ -108,5 +108,5 @@ The repo ships a `render.yaml` blueprint that provisions a managed Postgres plus
 7. Health check: `GET /health` on the server service.
 
 Default seed credentials (change immediately in production):
-- `admin@example.com` / `password123`
-- `crew@example.com` / `password123`
+- `admin@fathommarine.com` / `password123`
+- `crew@fathommarine.com` / `password123`

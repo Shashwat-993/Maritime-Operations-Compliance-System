@@ -30,8 +30,8 @@ async function main() {
   const passwordHash = await bcrypt.hash('password123', rounds)
   const users = await prisma.user.createMany({
     data: [
-      { name: 'Admin User', email: 'admin@example.com', passwordHash, role: 'ADMIN', shipId: null },
-      { name: 'Crew Member', email: 'crew@example.com', passwordHash, role: 'CREW', shipId: shipA.id },
+      { name: 'Captain Nipun Chatrath', email: 'admin@fathommarine.com', passwordHash, role: 'ADMIN', shipId: null },
+      { name: 'Shashwat Pal', email: 'crew@fathommarine.com', passwordHash, role: 'CREW', shipId: shipA.id },
       { name: 'Second Admin', email: 'admin2@example.com', passwordHash, role: 'ADMIN', shipId: null },
       { name: 'Crew Alpha', email: 'alpha@example.com', passwordHash, role: 'CREW', shipId: shipB.id },
       { name: 'Crew Bravo', email: 'bravo@example.com', passwordHash, role: 'CREW', shipId: shipC.id },
@@ -41,8 +41,8 @@ async function main() {
   })
   // Fetch users with IDs
   const allUsers = await prisma.user.findMany()
-  const admin = allUsers.find(u => u.email === 'admin@example.com')
-  const crew = allUsers.find(u => u.email === 'crew@example.com')
+  const admin = allUsers.find(u => u.email === 'admin@fathommarine.com')
+  const crew = allUsers.find(u => u.email === 'crew@fathommarine.com')
   const alpha = allUsers.find(u => u.email === 'alpha@example.com')
   const bravo = allUsers.find(u => u.email === 'bravo@example.com')
   const charlie = allUsers.find(u => u.email === 'charlie@example.com')

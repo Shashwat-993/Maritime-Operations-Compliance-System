@@ -90,11 +90,9 @@ export function Layout() {
         )}
         <span className="user-chip" title={user?.email}>
           <span className="user-avatar" aria-hidden="true">{initials(user?.name)}</span>
-          <span>
-            {user?.name}
-            <span className={`badge badge-role-${user?.role.toLowerCase()}`} style={{ marginLeft: 6 }}>
-              {user?.role}
-            </span>
+          <span className="user-chip-meta">
+            <span className="user-chip-name">{user?.name}</span>
+            <span className={`badge badge-role-${user?.role.toLowerCase()}`}>{user?.role}</span>
           </span>
         </span>
         <button

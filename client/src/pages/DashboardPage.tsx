@@ -51,11 +51,11 @@ export function DashboardPage() {
       <div className="stack">
         <h1>Dashboard</h1>
         <div className="grid-cards">
-          <div className="card skeleton" style={{ height: 110 }} />
-          <div className="card skeleton" style={{ height: 110 }} />
-          <div className="card skeleton" style={{ height: 110 }} />
-          <div className="card skeleton" style={{ height: 110 }} />
-          <div className="card skeleton" style={{ height: 110 }} />
+          <div className="card skeleton" style={{ height: 96 }} />
+          <div className="card skeleton" style={{ height: 96 }} />
+          <div className="card skeleton" style={{ height: 96 }} />
+          <div className="card skeleton" style={{ height: 96 }} />
+          <div className="card skeleton" style={{ height: 96 }} />
         </div>
         <div className="card skeleton" style={{ height: 260 }} />
         <div className="card skeleton" style={{ height: 120 }} />

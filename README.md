@@ -2,6 +2,15 @@
 
 Monorepo: **React + Vite + TypeScript** client, **Express + Prisma + PostgreSQL** API, JWT RBAC (ADMIN / CREW), maintenance tasks, drills, and computed compliance.
 
+## Live demo
+
+- App: <https://maritime-client.onrender.com/login>
+- Sign in with one of the seeded demo accounts (the buttons on the login screen auto-fill the form):
+  - `admin@fathommarine.com` / `password123` — Administrator (Captain Nipun Chatrath)
+  - `crew@fathommarine.com` / `password123` — Chief Engineer (Shashwat Pal)
+
+Hosted on Render's free tier, so the first request after a period of inactivity may take ~30 seconds while the server spins back up.
+
 ## Prerequisites
 
 - Node.js 20+

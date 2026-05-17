@@ -105,6 +105,7 @@ export function LoginPage() {
 
   return (
     <div className="auth-shell">
+     <div className="auth-card">
       <section className="auth-brand-panel" aria-label="Fathom Marine Consultants overview">
         <div className="auth-rings auth-rings-top" aria-hidden="true" />
         <div className="auth-rings auth-rings-main" aria-hidden="true" />
@@ -236,6 +237,7 @@ export function LoginPage() {
           )}
         </form>
       </section>
+     </div>
     </div>
   )
 }

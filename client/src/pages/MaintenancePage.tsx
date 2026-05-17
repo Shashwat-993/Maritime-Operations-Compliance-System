@@ -1,9 +1,16 @@
 import { Fragment, FormEvent, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../api/client'
-import type { MaintenanceTask, TaskComment, TaskStatus } from '../api/types'
+import type { CrewMember, MaintenanceTask, TaskComment, TaskStatus } from '../api/types'
 import { useShipScope } from '../hooks/useShipScope'
 import { useAuth } from '../context/AuthContext'
+
+function toLocalInput(iso: string | null): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
 
 const STATUSES: TaskStatus[] = ['PENDING', 'IN_PROGRESS', 'COMPLETED']
 
@@ -100,8 +107,15 @@ export function MaintenancePage() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [dueDate, setDueDate] = useState('')
+  const [assignedTo, setAssignedTo] = useState('')
   const [formError, setFormError] = useState('')
   const [mutationError, setMutationError] = useState('')
+
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editTitle, setEditTitle] = useState('')
+  const [editDescription, setEditDescription] = useState('')
+  const [editDueDate, setEditDueDate] = useState('')
+  const [editAssignedTo, setEditAssignedTo] = useState('')
 
   const { data: tasks, isLoading } = useQuery({
     queryKey: ['tasks', effectiveShipId, statusFilter, dateFilter],
@@ -118,6 +132,15 @@ export function MaintenancePage() {
     },
   })
 
+  const { data: shipUsers } = useQuery({
+    queryKey: ['ship-users', effectiveShipId],
+    enabled: Boolean(effectiveShipId) && isAdmin,
+    queryFn: async () => {
+      const { data } = await api.get<CrewMember[]>('/api/users', { params: shipQuery })
+      return data
+    },
+  })
+
   const createTask = useMutation({
     mutationFn: async () => {
       if (!effectiveShipId) throw new Error('No ship')
@@ -126,6 +149,7 @@ export function MaintenancePage() {
         title,
         description: description || null,
         due_date: dueDate ? new Date(dueDate).toISOString() : null,
+        assigned_to: assignedTo || null,
         status: 'PENDING',
       })
     },
@@ -135,6 +159,7 @@ export function MaintenancePage() {
       setTitle('')
       setDescription('')
       setDueDate('')
+      setAssignedTo('')
       setFormError('')
     },
     onError: (err: unknown) => {
@@ -144,6 +169,39 @@ export function MaintenancePage() {
       setFormError(msg)
     },
   })
+
+  const editTask = useMutation({
+    mutationFn: async () => {
+      if (!editingId) throw new Error('No task selected')
+      await api.patch(`/api/tasks/${editingId}`, {
+        title: editTitle,
+        description: editDescription || null,
+        due_date: editDueDate ? new Date(editDueDate).toISOString() : null,
+        assigned_to: editAssignedTo || null,
+      })
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] })
+      qc.invalidateQueries({ queryKey: ['compliance'] })
+      setEditingId(null)
+      setMutationError('')
+    },
+    onError: (err: unknown) => {
+      const msg =
+        (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
+        'Failed to update task'
+      setMutationError(msg)
+    },
+  })
+
+  function startEdit(t: MaintenanceTask) {
+    setEditingId(t.id)
+    setEditTitle(t.title)
+    setEditDescription(t.description ?? '')
+    setEditDueDate(toLocalInput(t.dueDate))
+    setEditAssignedTo(t.assignee?.id ?? '')
+    setMutationError('')
+  }
 
   const patchStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: TaskStatus }) => {
@@ -271,6 +329,23 @@ export function MaintenancePage() {
               onChange={(e) => setDueDate(e.target.value)}
             />
           </label>
+          <label className="field">
+            Assign to
+            <select
+              className="select"
+              value={assignedTo}
+              onChange={(e) => setAssignedTo(e.target.value)}
+            >
+              <option value="">Unassigned</option>
+              {(shipUsers ?? [])
+                .filter((u) => u.role === 'CREW')
+                .map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name} ({u.email})
+                  </option>
+                ))}
+            </select>
+          </label>
           {formError && <ErrorBanner message={formError} />}
           <button type="submit" disabled={createTask.isPending} className="btn btn-primary">
             {createTask.isPending ? 'Creating…' : 'Create task'}
@@ -298,69 +373,154 @@ export function MaintenancePage() {
               <tbody>
                 {(tasks ?? []).map((t) => (
                   <Fragment key={t.id}>
-                    <tr>
-                      <td>
-                        <button
-                          type="button"
-                          className="title-link"
-                          onClick={() => setExpandedTask(expandedTask === t.id ? null : t.id)}
-                        >
-                          {expandedTask === t.id ? '▾' : '▸'} {t.title}
-                        </button>
-                        {t.description && <div className="task-description">{t.description}</div>}
-                      </td>
-                      <td>
-                        <span className={statusBadgeClass(t.status)}>
-                          {t.status.replace('_', ' ')}
-                        </span>
-                        {isOverdue(t) && (
-                          <span className="badge badge-overdue" style={{ marginLeft: 6 }}>
-                            Overdue
-                          </span>
-                        )}
-                      </td>
-                      <td>
-                        {t.dueDate ? (
-                          <span className={isOverdue(t) ? '' : 'muted'} style={{ fontSize: '0.85rem' }}>
-                            {new Date(t.dueDate).toLocaleString()}
-                          </span>
-                        ) : (
-                          <span className="muted">—</span>
-                        )}
-                      </td>
-                      <td>
-                        {t.assignee?.name ?? <span className="muted">Unassigned</span>}
-                      </td>
-                      <td>
-                        <div className="row" style={{ gap: 6 }}>
-                          <select
-                            className="select select-sm"
-                            value={t.status}
-                            onChange={(e) =>
-                              patchStatus.mutate({ id: t.id, status: e.target.value as TaskStatus })
-                            }
+                    {editingId === t.id ? (
+                      <tr>
+                        <td colSpan={5} style={{ background: 'var(--color-surface-alt)' }}>
+                          <form
+                            className="stack-sm"
+                            onSubmit={(e) => {
+                              e.preventDefault()
+                              if (!editTitle.trim()) return
+                              editTask.mutate()
+                            }}
                           >
-                            {STATUSES.map((s) => (
-                              <option key={s} value={s}>
-                                {s.replace('_', ' ')}
-                              </option>
-                            ))}
-                          </select>
-                          {isAdmin && (
-                            <button
-                              type="button"
-                              className="btn btn-danger btn-sm"
-                              onClick={() => {
-                                if (confirm(`Delete "${t.title}"?`)) deleteTask.mutate(t.id)
-                              }}
-                            >
-                              Delete
-                            </button>
+                            <label className="field">
+                              Title
+                              <input
+                                className="input"
+                                value={editTitle}
+                                onChange={(e) => setEditTitle(e.target.value)}
+                                maxLength={200}
+                                required
+                              />
+                            </label>
+                            <label className="field">
+                              Description
+                              <textarea
+                                className="textarea"
+                                value={editDescription}
+                                onChange={(e) => setEditDescription(e.target.value)}
+                                maxLength={2000}
+                                rows={3}
+                              />
+                            </label>
+                            <div className="row">
+                              <label className="field" style={{ flex: 1, minWidth: 200 }}>
+                                Due date
+                                <input
+                                  type="datetime-local"
+                                  className="input"
+                                  value={editDueDate}
+                                  onChange={(e) => setEditDueDate(e.target.value)}
+                                />
+                              </label>
+                              <label className="field" style={{ flex: 1, minWidth: 200 }}>
+                                Assign to
+                                <select
+                                  className="select"
+                                  value={editAssignedTo}
+                                  onChange={(e) => setEditAssignedTo(e.target.value)}
+                                >
+                                  <option value="">Unassigned</option>
+                                  {(shipUsers ?? [])
+                                    .filter((u) => u.role === 'CREW')
+                                    .map((u) => (
+                                      <option key={u.id} value={u.id}>
+                                        {u.name} ({u.email})
+                                      </option>
+                                    ))}
+                                </select>
+                              </label>
+                            </div>
+                            <div className="row">
+                              <button type="submit" disabled={editTask.isPending} className="btn btn-primary btn-sm">
+                                {editTask.isPending ? 'Saving…' : 'Save changes'}
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn-ghost btn-sm"
+                                onClick={() => setEditingId(null)}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </form>
+                        </td>
+                      </tr>
+                    ) : (
+                      <tr>
+                        <td>
+                          <button
+                            type="button"
+                            className="title-link"
+                            onClick={() => setExpandedTask(expandedTask === t.id ? null : t.id)}
+                          >
+                            {expandedTask === t.id ? '▾' : '▸'} {t.title}
+                          </button>
+                          {t.description && <div className="task-description">{t.description}</div>}
+                        </td>
+                        <td>
+                          <span className={statusBadgeClass(t.status)}>
+                            {t.status.replace('_', ' ')}
+                          </span>
+                          {isOverdue(t) && (
+                            <span className="badge badge-overdue" style={{ marginLeft: 6 }}>
+                              Overdue
+                            </span>
                           )}
-                        </div>
-                      </td>
-                    </tr>
-                    {expandedTask === t.id && (
+                        </td>
+                        <td>
+                          {t.dueDate ? (
+                            <span className={isOverdue(t) ? '' : 'muted'} style={{ fontSize: '0.85rem' }}>
+                              {new Date(t.dueDate).toLocaleString()}
+                            </span>
+                          ) : (
+                            <span className="muted">—</span>
+                          )}
+                        </td>
+                        <td>
+                          {t.assignee?.name ?? <span className="muted">Unassigned</span>}
+                        </td>
+                        <td>
+                          <div className="row" style={{ gap: 6 }}>
+                            <select
+                              className="select select-sm"
+                              value={t.status}
+                              onChange={(e) =>
+                                patchStatus.mutate({ id: t.id, status: e.target.value as TaskStatus })
+                              }
+                            >
+                              {STATUSES.map((s) => (
+                                <option key={s} value={s}>
+                                  {s.replace('_', ' ')}
+                                </option>
+                              ))}
+                            </select>
+                            {isAdmin && (
+                              <>
+                                <button
+                                  type="button"
+                                  className="btn btn-ghost btn-sm"
+                                  onClick={() => startEdit(t)}
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn btn-danger btn-sm"
+                                  onClick={() => {
+                                    if (confirm(`Delete "${t.title}"?`)) deleteTask.mutate(t.id)
+                                  }}
+                                >
+                                  Delete
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                    {expandedTask === t.id && editingId !== t.id && (
                       <tr>
                         <td colSpan={5} style={{ background: 'var(--color-surface-alt)' }}>
                           <CommentsPanel task={t} />

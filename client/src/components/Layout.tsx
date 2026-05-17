@@ -1,6 +1,9 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../context/AuthContext'
 import { useShipScope } from '../hooks/useShipScope'
+import { api } from '../api/client'
+import type { ComplianceResponse } from '../api/types'
 
 function initials(name: string | undefined): string {
   if (!name) return '?'
@@ -15,7 +18,19 @@ function initials(name: string | undefined): string {
 
 export function Layout() {
   const { user, logout } = useAuth()
-  const { isAdmin, ships, adminShipId, setAdminShipId } = useShipScope()
+  const { isAdmin, ships, adminShipId, setAdminShipId, effectiveShipId, shipQuery } = useShipScope()
+
+  const { data: compliance } = useQuery({
+    queryKey: ['compliance', effectiveShipId],
+    enabled: Boolean(effectiveShipId),
+    queryFn: async () => {
+      const { data } = await api.get<ComplianceResponse>('/api/compliance', { params: shipQuery })
+      return data
+    },
+  })
+
+  const overdueCount = compliance?.overdue.length ?? 0
+  const missedCount = compliance?.counts.drillsMissed ?? 0
 
   return (
     <div className="app-shell">
@@ -37,9 +52,19 @@ export function Layout() {
           </NavLink>
           <NavLink to="/maintenance" className={({ isActive }) => `nav-link${isActive ? ' is-active' : ''}`}>
             Maintenance
+            {overdueCount > 0 && (
+              <span className="nav-badge nav-badge-danger" title={`${overdueCount} overdue`}>
+                {overdueCount}
+              </span>
+            )}
           </NavLink>
           <NavLink to="/drills" className={({ isActive }) => `nav-link${isActive ? ' is-active' : ''}`}>
             Drills
+            {missedCount > 0 && (
+              <span className="nav-badge nav-badge-danger" title={`${missedCount} missed`}>
+                {missedCount}
+              </span>
+            )}
           </NavLink>
           <NavLink to="/crew" className={({ isActive }) => `nav-link${isActive ? ' is-active' : ''}`}>
             Crew

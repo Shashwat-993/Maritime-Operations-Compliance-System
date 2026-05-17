@@ -53,8 +53,13 @@ export function DashboardPage() {
         <div className="grid-cards">
           <div className="card skeleton" style={{ height: 110 }} />
           <div className="card skeleton" style={{ height: 110 }} />
+          <div className="card skeleton" style={{ height: 110 }} />
+          <div className="card skeleton" style={{ height: 110 }} />
+          <div className="card skeleton" style={{ height: 110 }} />
         </div>
         <div className="card skeleton" style={{ height: 260 }} />
+        <div className="card skeleton" style={{ height: 120 }} />
+        <div className="card skeleton" style={{ height: 120 }} />
       </div>
     )
   }
@@ -107,6 +112,22 @@ export function DashboardPage() {
             {data.counts.drillsTotal} drills total
           </div>
         </div>
+        <div className={data.counts.tasksPending > 0 ? 'card card-accent-warning' : 'card card-accent'}>
+          <div className="card-label">Pending maintenance</div>
+          <div
+            className="card-value"
+            style={{
+              color: data.counts.tasksPending > 0 ? 'var(--color-warning)' : 'var(--color-success)',
+            }}
+          >
+            {data.counts.tasksPending}
+          </div>
+          <div className="card-meta">
+            {data.counts.tasksPending === 0
+              ? 'Nothing waiting'
+              : `Open across ${data.counts.tasksTotal} tracked tasks`}
+          </div>
+        </div>
         <div className={data.overdue.length > 0 ? 'card card-accent-danger' : 'card card-accent'}>
           <div className="card-label">Overdue tasks</div>
           <div
@@ -119,6 +140,22 @@ export function DashboardPage() {
           </div>
           <div className="card-meta">
             {data.overdue.length === 0 ? 'All on track' : 'Need attention now'}
+          </div>
+        </div>
+        <div className={data.counts.drillsMissed > 0 ? 'card card-accent-danger' : 'card card-accent'}>
+          <div className="card-label">Missed drills</div>
+          <div
+            className="card-value"
+            style={{
+              color: data.counts.drillsMissed > 0 ? 'var(--color-danger)' : 'var(--color-success)',
+            }}
+          >
+            {data.counts.drillsMissed}
+          </div>
+          <div className="card-meta">
+            {data.counts.drillsMissed === 0
+              ? 'No drills missed'
+              : 'Past their date with no attendance'}
           </div>
         </div>
       </div>
@@ -166,6 +203,24 @@ export function DashboardPage() {
                     — due {new Date(t.dueDate).toLocaleDateString()}
                   </span>
                 )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className={data.missedDrills.length > 0 ? 'card card-accent-danger' : 'card'}>
+        <div className="card-label">Missed drills</div>
+        {data.missedDrills.length === 0 ? (
+          <p className="muted">No drills missed.</p>
+        ) : (
+          <ul style={{ margin: 0, paddingLeft: '1.1rem' }}>
+            {data.missedDrills.map((d) => (
+              <li key={d.id} style={{ marginBottom: 4 }}>
+                <span style={{ fontWeight: 500 }}>{d.type}</span>
+                <span className="muted text-sm">
+                  {' '}— scheduled {new Date(d.scheduledDate).toLocaleDateString()}, no attendance recorded
+                </span>
               </li>
             ))}
           </ul>

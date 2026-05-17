@@ -1,4 +1,4 @@
-import type { MaintenanceTask, DrillAttendance } from '@prisma/client'
+import type { MaintenanceTask, DrillAttendance, Drill } from '@prisma/client'
 
 export function maintenanceScore(tasks: Pick<MaintenanceTask, 'status'>[]): number | null {
   const total = tasks.length
@@ -18,4 +18,12 @@ export function overdueTasks<T extends Pick<MaintenanceTask, 'id' | 'dueDate' | 
   return tasks.filter(
     (t) => t.dueDate != null && t.dueDate < now && t.status !== 'COMPLETED',
   )
+}
+
+/** Drills whose scheduled date has passed with zero attendance records logged. */
+export function missedDrills<
+  T extends Pick<Drill, 'id' | 'type' | 'scheduledDate'> & { attendanceCount: number },
+>(drills: T[]) {
+  const now = new Date()
+  return drills.filter((d) => d.scheduledDate < now && d.attendanceCount === 0)
 }

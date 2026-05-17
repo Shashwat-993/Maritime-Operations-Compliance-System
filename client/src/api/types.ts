@@ -53,10 +53,13 @@ export type ComplianceResponse = {
   maintenanceScore: number | null
   drillScore: number | null
   overdue: { id: string; title: string; status: TaskStatus; dueDate: string | null }[]
+  missedDrills: { id: string; type: DrillType; scheduledDate: string }[]
   counts: {
     tasksTotal: number
     tasksCompleted: number
+    tasksPending: number
     drillsTotal: number
+    drillsMissed: number
     attendanceMarked: number
     attendanceAttended: number
   }

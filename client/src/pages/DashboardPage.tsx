@@ -87,7 +87,7 @@ export function DashboardPage() {
     <div className="stack">
       <div>
         <h1>Dashboard</h1>
-        <p className="muted text-sm" style={{ marginTop: 4 }}>
+        <p className="muted text-sm" style={{ marginTop: 8 }}>
           Compliance summary for the selected ship.
         </p>
       </div>

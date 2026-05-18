@@ -251,7 +251,7 @@ export function MaintenancePage() {
     <div className="stack">
       <div>
         <h1>Maintenance</h1>
-        <p className="muted text-sm" style={{ marginTop: 4 }}>
+        <p className="muted text-sm" style={{ marginTop: 8 }}>
           Manage tasks and crew comments for this ship.
         </p>
       </div>

@@ -111,7 +111,7 @@ export function DrillsPage() {
     <div className="stack">
       <div>
         <h1>Drills</h1>
-        <p className="muted text-sm" style={{ marginTop: 4 }}>
+        <p className="muted text-sm" style={{ marginTop: 8 }}>
           Schedule safety drills and log crew attendance.
         </p>
       </div>

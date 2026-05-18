@@ -26,7 +26,7 @@ export function CrewPage() {
     <div className="stack">
       <div>
         <h1>Crew on this ship</h1>
-        <p className="muted text-sm" style={{ marginTop: 4 }}>
+        <p className="muted text-sm" style={{ marginTop: 8 }}>
           {(data ?? []).length} member{(data ?? []).length === 1 ? '' : 's'} assigned.
         </p>
       </div>

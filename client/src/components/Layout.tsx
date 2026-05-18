@@ -46,7 +46,7 @@ export function Layout() {
               <path d="M9 19l3 2 3-2" />
             </svg>
           </span>
-          Maritime Ops
+          MOCS
         </span>
         <nav className="app-nav" aria-label="Main">
           <NavLink to="/" end className={({ isActive }) => `nav-link${isActive ? ' is-active' : ''}`}>

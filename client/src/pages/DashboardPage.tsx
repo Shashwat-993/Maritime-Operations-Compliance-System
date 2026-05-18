@@ -164,12 +164,12 @@ export function DashboardPage() {
         <div className="card-label">Scores overview</div>
         <ResponsiveContainer width="100%" height={240}>
           <BarChart data={chartData} margin={{ top: 16, right: 16, left: -10, bottom: 4 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-            <XAxis dataKey="name" tick={{ fill: 'var(--color-text-muted)', fontSize: 12 }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-strong)" />
+            <XAxis dataKey="name" tick={{ fill: 'var(--color-text-faint)', fontSize: 12 }} />
             <YAxis
               domain={[0, 100]}
               unit="%"
-              tick={{ fill: 'var(--color-text-muted)', fontSize: 12 }}
+              tick={{ fill: 'var(--color-text-faint)', fontSize: 12 }}
             />
             <Tooltip
               formatter={(_v: number, _n, p) => [fmtScore(p.payload.score), 'Score']}

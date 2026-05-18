@@ -68,8 +68,17 @@
   --shadow-sm: 0 1px 2px rgb(15 23 42 / 4%);
   --shadow-md: 0 4px 12px rgb(15 23 42 / 6%);
   --shadow-lg: 0 12px 32px rgb(15 23 42 / 10%);
-  --shadow-card: 0 1px 2px rgb(15 23 42 / 4%), 0 8px 24px rgb(15 23 42 / 5%);
-  --shadow-card-hover: 0 4px 14px rgb(24 95 165 / 12%), 0 14px 32px rgb(15 23 42 / 8%);
+  --shadow-card:
+    inset 0 1px 0 0 rgb(255 255 255 / 70%),
+    0 1px 2px rgb(15 23 42 / 4%),
+    0 8px 24px rgb(15 23 42 / 5%);
+  --shadow-card-hover:
+    inset 0 1px 0 0 rgb(255 255 255 / 80%),
+    0 4px 14px rgb(24 95 165 / 12%),
+    0 14px 32px rgb(15 23 42 / 8%);
+
+  /* focus ring */
+  --color-focus-ring: rgb(24 95 165 / 12%);
 
   color: var(--color-text);
   background: var(--color-bg);
@@ -113,12 +122,31 @@
   --color-info: #60a5fa;
   --color-info-soft: rgb(96 165 250 / 16%);
 
-  /* shadows */
+  /* shadows — final shadow on card includes a glass-edge inset highlight */
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%);
   --shadow-md: 0 4px 12px rgb(0 0 0 / 38%);
   --shadow-lg: 0 12px 32px rgb(0 0 0 / 48%);
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 28%), 0 10px 30px rgb(0 0 0 / 40%);
-  --shadow-card-hover: 0 4px 16px rgb(90 167 237 / 24%), 0 18px 38px rgb(0 0 0 / 45%);
+  --shadow-card:
+    inset 0 1px 0 0 rgb(255 255 255 / 8%),
+    0 1px 2px rgb(0 0 0 / 28%),
+    0 10px 30px rgb(0 0 0 / 40%);
+  --shadow-card-hover:
+    inset 0 1px 0 0 rgb(255 255 255 / 10%),
+    0 4px 16px rgb(90 167 237 / 24%),
+    0 18px 38px rgb(0 0 0 / 45%);
+
+  /* focus ring — brighter primary at higher alpha so it shows on the deep surface */
+  --color-focus-ring: rgb(90 167 237 / 22%);
+
+  /* badge dark tints */
+  --badge-fire-bg: rgb(248 113 113 / 16%);
+  --badge-fire-fg: #fca5a5;
+  --badge-evac-bg: rgb(251 146 60 / 16%);
+  --badge-evac-fg: #fdba74;
+  --badge-admin-bg: rgb(90 167 237 / 16%);
+  --badge-admin-fg: #93c5fd;
+  --badge-crew-bg: rgb(74 222 128 / 14%);
+  --badge-crew-fg: #86efac;
 }
 
 * {
@@ -418,7 +446,7 @@ code {
 .textarea:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgb(24 95 165 / 10%);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .textarea {
@@ -526,13 +554,13 @@ code {
 }
 
 .badge-fire {
-  background: #fee2e2;
-  color: #b91c1c;
+  background: var(--badge-fire-bg, #fee2e2);
+  color: var(--badge-fire-fg, #b91c1c);
 }
 
 .badge-evacuation {
-  background: #ffedd5;
-  color: #c2410c;
+  background: var(--badge-evac-bg, #ffedd5);
+  color: var(--badge-evac-fg, #c2410c);
 }
 
 .badge-mob {
@@ -541,13 +569,13 @@ code {
 }
 
 .badge-role-admin {
-  background: #e6f1fb;
-  color: #0c447c;
+  background: var(--badge-admin-bg, #e6f1fb);
+  color: var(--badge-admin-fg, #0c447c);
 }
 
 .badge-role-crew {
-  background: #e1f5ee;
-  color: #085041;
+  background: var(--badge-crew-bg, #e1f5ee);
+  color: var(--badge-crew-fg, #085041);
 }
 
 /* ===== Tables ===== */

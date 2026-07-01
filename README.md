@@ -66,7 +66,8 @@ After `npm run db:seed`:
 ## Compliance API semantics
 
 - **maintenanceScore**: `COMPLETED` tasks / total tasks × 100. If there are no tasks, the score is `null` (not `NaN`).
-- **drillScore**: Count of `drill_attendance` rows with `attended = true` divided by number of drills for the ship × 100. If there are no drills, the score is `null`.
+- **drillScore**: Of all logged `drill_attendance` records, the percentage marked `attended = true` (attended records / total attendance records × 100). If no attendance has been logged, the score is `null`.
+- **missedDrills**: Drills whose `scheduled_date` has passed with zero attendance records logged.
 - **overdue**: Tasks where `due_date < now` and `status` is not `COMPLETED`.
 
 ## Docker (full stack)

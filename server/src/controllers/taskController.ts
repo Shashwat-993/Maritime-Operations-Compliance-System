@@ -9,6 +9,22 @@ const MAX_TITLE = 200
 const MAX_DESC = 2000
 const MAX_NOTE = 2000
 
+/**
+ * Validates a would-be assignee for a task on `shipId`. Returns an error message
+ * when the user does not exist or is not assigned to that ship, otherwise null.
+ * A blank/absent value means "unassigned" and is always allowed.
+ */
+async function assigneeError(assignedTo: unknown, shipId: string): Promise<string | null> {
+  if (typeof assignedTo !== 'string' || assignedTo.trim() === '') return null
+  const assignee = await prisma.user.findUnique({
+    where: { id: assignedTo },
+    select: { shipId: true },
+  })
+  if (!assignee) return 'Assigned user not found'
+  if (assignee.shipId !== shipId) return 'Assigned user is not on this ship'
+  return null
+}
+
 export async function listTasks(req: Request, res: Response) {
   const user = getAuthUser(req)!
   const ship = resolveShipId(user, req.query.ship_id as string | undefined)
@@ -54,6 +70,9 @@ export async function createTask(req: Request, res: Response) {
   const shipExists = await prisma.ship.findUnique({ where: { id: ship_id }, select: { id: true } })
   if (!shipExists) return res.status(404).json({ error: 'Ship not found' })
 
+  const assigneeErr = await assigneeError(assigned_to, ship_id)
+  if (assigneeErr) return res.status(400).json({ error: assigneeErr })
+
   const st: TaskStatus = status && STATUSES.includes(status) ? status : 'PENDING'
   const dueDate = due_date ? new Date(due_date) : null
   if (due_date && dueDate && Number.isNaN(dueDate.getTime())) {
@@ -63,7 +82,7 @@ export async function createTask(req: Request, res: Response) {
   const task = await prisma.maintenanceTask.create({
     data: {
       shipId: ship_id,
-      assignedTo: typeof assigned_to === 'string' ? assigned_to : null,
+      assignedTo: typeof assigned_to === 'string' && assigned_to.trim() !== '' ? assigned_to : null,
       title: title.trim(),
       description: typeof description === 'string' ? description : null,
       status: st,
@@ -118,13 +137,17 @@ export async function updateTask(req: Request, res: Response) {
     }
     data.dueDate = d
   }
-  if (assigned_to !== undefined) {
-    data.assignedTo = typeof assigned_to === 'string' ? assigned_to : null
-  }
   if (typeof ship_id === 'string') {
     const shipExists = await prisma.ship.findUnique({ where: { id: ship_id }, select: { id: true } })
     if (!shipExists) return res.status(404).json({ error: 'Ship not found' })
     data.shipId = ship_id
+  }
+  if (assigned_to !== undefined) {
+    const effectiveShipId = typeof ship_id === 'string' ? ship_id : existing.shipId
+    const assigneeErr = await assigneeError(assigned_to, effectiveShipId)
+    if (assigneeErr) return res.status(400).json({ error: assigneeErr })
+    data.assignedTo =
+      typeof assigned_to === 'string' && assigned_to.trim() !== '' ? assigned_to : null
   }
   if (Object.keys(data).length === 0) {
     return res.status(400).json({ error: 'No valid fields to update' })

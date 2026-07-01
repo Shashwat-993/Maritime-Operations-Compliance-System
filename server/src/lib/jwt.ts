@@ -1,6 +1,10 @@
 import jwt, { type SignOptions } from 'jsonwebtoken'
 import type { Role } from '@prisma/client'
 
+if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('JWT_SECRET must be set in production')
+}
+
 const secret = process.env.JWT_SECRET ?? 'dev-insecure-secret'
 
 export type JwtPayload = {

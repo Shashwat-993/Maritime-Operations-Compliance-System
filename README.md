@@ -6,7 +6,7 @@ Monorepo: **React + Vite + TypeScript** client, **Express + Prisma + PostgreSQL*
 
 - App: <https://maritime-client.onrender.com/login>
 - Sign in with one of the seeded demo accounts (the buttons on the login screen auto-fill the form):
-  - `admin@fathommarine.com` / `password123` — Administrator (Captain Nipun Chatrath)
+  - `admin@fathommarine.com` / `password123` — Administrator (Captain Jack Dawson)
   - `crew@fathommarine.com` / `password123` — Chief Engineer (Shashwat Pal)
 
 Hosted on Render's free tier, so the first request after a period of inactivity may take ~30 seconds while the server spins back up.
@@ -60,7 +60,7 @@ After `npm run db:seed`:
 
 | Email | Password | Role |
 |-------|----------|------|
-| admin@fathommarine.com | password123 | ADMIN (Captain Nipun Chatrath) |
+| admin@fathommarine.com | password123 | ADMIN (Captain Jack Dawson) |
 | crew@fathommarine.com | password123 | CREW – Chief Engineer (Shashwat Pal), assigned to first ship |
 
 ## Compliance API semantics

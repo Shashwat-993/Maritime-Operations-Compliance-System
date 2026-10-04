@@ -14,9 +14,9 @@ export async function ensureDemoUsers() {
 
   await prisma.user.upsert({
     where: { email: 'admin@fathommarine.com' },
-    update: { name: 'Captain Nipun Chatrath', role: 'ADMIN', shipId: null },
+    update: { name: 'Captain Jack Dawson', role: 'ADMIN', shipId: null },
     create: {
-      name: 'Captain Nipun Chatrath',
+      name: 'Captain Jack Dawson',
       email: 'admin@fathommarine.com',
       passwordHash,
       role: 'ADMIN',

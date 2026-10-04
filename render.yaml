@@ -23,11 +23,10 @@ services:
         generateValue: true
       - key: PORT
         value: 4000
+      # Full public URL: fromService `host` yields the bare internal hostname,
+      # which browsers never send as an Origin.
       - key: CORS_ORIGIN
-        fromService:
-          type: web
-          name: maritime-client
-          property: host
+        value: https://maritime-client.onrender.com
 
   - type: web
     name: maritime-client
@@ -38,8 +37,6 @@ services:
     rootDir: client
     dockerfilePath: ./Dockerfile
     envVars:
+      # Baked into the bundle at build time; must be an absolute public URL.
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: maritime-server
-          property: host
+        value: https://maritime-server.onrender.com

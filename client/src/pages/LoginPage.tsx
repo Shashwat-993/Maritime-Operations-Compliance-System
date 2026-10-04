@@ -13,7 +13,7 @@ type DemoAccount = {
 
 const demoAccounts: DemoAccount[] = [
   {
-    name: 'Captain Nipun Chatrath',
+    name: 'Captain Jack Dawson',
     initials: 'NC',
     title: 'Administrator',
     email: 'admin@fathommarine.com',

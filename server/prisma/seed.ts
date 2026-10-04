@@ -30,7 +30,7 @@ async function main() {
   const passwordHash = await bcrypt.hash('password123', rounds)
   const users = await prisma.user.createMany({
     data: [
-      { name: 'Captain Nipun Chatrath', email: 'admin@fathommarine.com', passwordHash, role: 'ADMIN', shipId: null },
+      { name: 'Captain Jack Dawson', email: 'admin@fathommarine.com', passwordHash, role: 'ADMIN', shipId: null },
       { name: 'Shashwat Pal', email: 'crew@fathommarine.com', passwordHash, role: 'CREW', shipId: shipA.id },
       { name: 'Second Admin', email: 'admin2@example.com', passwordHash, role: 'ADMIN', shipId: null },
       { name: 'Crew Alpha', email: 'alpha@example.com', passwordHash, role: 'CREW', shipId: shipB.id },
